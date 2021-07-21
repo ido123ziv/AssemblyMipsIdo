@@ -226,6 +226,60 @@ end_task2:
 	li $v0, 4  # print null terminated string "\n"
 	syscall
 
+    # Mission 3 - Count how many letters in shortest word
+# t0 -> the word t1 -> current letter t4- > odd buffer t5 -> even buffer
+#	add $t4, $0, $0 # reset t4
+	la $t0, StringBuffer # get StringBuffer to a worker var
+
+t4_logger_word:  # this loop will remember odd words
+	lb $t1, ($t0) # load to t1 the first character in string
+	beq $t1, 32, next_word_short # if char == ' ' go to next word
+	beq $t1, 10, finish_short # if new line end count
+	addi $t4, $t4, 1 # count++ for current word
+	addi $t0, $t0, 1 # check next char
+	j t4_logger_word
+
+next_word_short:
+	addi $t0, $t0, 1 # check next char, continue from space
+	beqz $t5, t5_logger_word # if t5 is zero, assign a word to it
+	bgt $t5, $t4, reset_t5 # if t5 > t4 reset t5
+	add $t4, $0, $0 # reset t4 because t4 > t5
+	j t4_logger_word 
+
+reset_t5:
+	add $t5, $0, $0  # reset t5 
+
+t5_logger_word:  # this loop will remember even words
+	lb $t1, ($t0) # load to t1 the first character in string
+	beq $t1, 32, next_word_short # if char == ' ' go to next word
+	beq $t1, 10, finish_short # if new line end count
+	addi $t5, $t5, 1 # count++ for current word
+	addi $t0, $t0, 1 # check next char
+	j t5_logger_word
+
+finish_short:
+	la $a0, ShortestWord # load text ShortestWord
+	li $v0, 4 # print null terminated string "The Shortest word = "
+	syscall
+
+	blt $t4, $t5, print_odd_short # if t2 > t3 print odd
+	add $t7, $t5, $t0 # Store longest word, for future purposes
+	la $a0, ($t5) # print letter count
+	li $v0, 1 # service 1 is print integer
+	syscall
+	j end_task3 # goto end if printed
+
+print_odd_short:
+	add $t7, $t4, $t0 # Store longest word, for future purposes
+	la $a0, ($t4) # print letter count
+	li $v0, 1 # service 1 is print integer
+	syscall
+
+# echo finish
+end_task3:
+	la $a0, NewLine # load NewLine
+	li $v0, 4  # print null terminated string "\n"
+	syscall
 
 
 	#ADD data valiadation
