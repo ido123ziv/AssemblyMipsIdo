@@ -281,6 +281,23 @@ end_task3:
 	li $v0, 4  # print null terminated string "\n"
 	syscall
 
+# Mission 4 - diff between long to short
+# t6 -> longest , t7 -> shortest
+
+end_task4:
+	la $a0, Diff # load text Diff
+	li $v0, 4 # print null terminated string "Difference = "
+	syscall
+
+	sub $t6, $t6, $t7 # subtract t7 from t6 (long - short)
+	la $a0, ($t6) # print diff
+	li $v0, 1 # service 1 is print integer
+	syscall
+
+	la $a0, NewLine # load NewLine
+	li $v0, 4  # print null terminated string "\n"
+	syscall
+
 
 	#ADD data valiadation
 	li $v0, 10 # Exit 
