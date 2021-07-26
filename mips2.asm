@@ -60,6 +60,8 @@ input_validation:
 	lb $t1, ($t0) # load to t1 the first character in string
 	beq $t1, 10, check_new_line # if new line end count
 	beq $t1, 32, check_spaces # if char == ' ' go to next word
+	bgt $t1, 122, input # bigger than z
+	blt $t1, 65, input # lower than A
 	move $t2, $t1 # set the counter t2 to t1
 	addi $t0, $t0, 1 # check next char
 	j input_validation
