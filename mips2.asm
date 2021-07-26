@@ -15,6 +15,9 @@
 	# "Letters in longest word = "
 	# "Letters in shortest word = "
 	# "Total number of letters = "
+	LettersCount: .asciiz "Total number of letters = "
+	InputOk: .asciiz "Input is Ok"
+	InputNotOk: .asciiz "Input is Not Ok"
 ################# Code segment #####################
 .text
 .globl main
@@ -26,6 +29,69 @@ main: # main program entry
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
 	li $v0, 8 # service 8 is print str
+	syscall
+
+# input validation
+# small or capital letter 65-90 capital, 97-122 ascii
+# no two spaces together
+# not ending in space
+# at least one letter
+
+	la $t0, StringBuffer # get StringBuffer to a worker var
+	li $t1, 0 # reset counter t1
+	li $t2, 0 # reset counter t2
+
+# ############### print t1 ################# #
+# la $a0, ($t1) # print WordCount
+# li $v0, 1 # service 1 is print integer
+# syscall
+# ############### print t2 ################# #
+# la $a0, ($t2) # print WordCount
+# li $v0, 1 # service 1 is print integer
+# syscall
+# ############### print newline ################# #
+# la $a0, NewLine 
+# li $v0, 4
+# syscall
+# ################################ #
+
+
+input_validation:
+	lb $t1, ($t0) # load to t1 the first character in string
+	beq $t1, 10, check_new_line # if new line end count
+	move $t2, $t1 # set the counter t2 to t1
+	addi $t0, $t0, 1 # check next char
+	j input_validation
+
+	
+check_new_line:
+	beq $t2, 32, input # if last char is space
+#	addi $t0, $t0, 1 
+	j end_validation
+
+input:
+	la $a0, InputNotOk # input is not ok
+	li $v0, 4 # print null terminated string "Number of words = "
+	syscall
+	la $a0, NewLine 
+	li $v0, 4
+	syscall
+	la $a0, GetString # $a0 = address of str, set $a0 to GetString label
+	li $v0, 4 # read string
+	syscall
+
+	la $a0, StringBuffer # enter the input string to string buffer
+	li $a1, 81 # Maximum String size is 80
+	li $v0, 8 # service 8 is print str
+	syscall
+	j input_validation #check again
+
+end_validation: # Finish validation check
+	la $a0, InputOk # input is ok
+	li $v0, 4 # print null terminated string "Number of words = "
+	syscall
+	la $a0, NewLine 
+	li $v0, 4
 	syscall
 
 # Mission 1 - Count how many words in the string	
