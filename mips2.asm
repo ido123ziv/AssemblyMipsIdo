@@ -62,6 +62,7 @@ input_validation:
 	beq $t1, 32, check_spaces # if char == ' ' go to next word
 	bgt $t1, 122, input # bigger than z
 	blt $t1, 65, input # lower than A
+	bgt $t1, 90, check_for_letters # check betweem Z to a
 	move $t2, $t1 # set the counter t2 to t1
 	addi $t0, $t0, 1 # check next char
 	j input_validation
@@ -72,6 +73,12 @@ check_new_line:
 
 check_spaces:
 	beq $t2, 32, input # if two spaces
+	move $t2, $t1 # if not, continue
+	addi $t0, $t0, 1 
+	j input_validation
+	
+check_for_letters:
+	blt $t1, 97, input # if betweem 90-97
 	move $t2, $t1 # if not, continue
 	addi $t0, $t0, 1 
 	j input_validation
