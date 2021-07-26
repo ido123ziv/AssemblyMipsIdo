@@ -1,4 +1,4 @@
-# Title: Maman12 Filename: Question3
+ # Title: Maman12 Filename: Question3
 # Author: Ido Ziv Date: 20/07/2021
 # Description: Question 3 - get string from user and count number of words, largest word and smallest word
 # Input:
@@ -181,7 +181,38 @@ end_task4:
 	li $v0, 4  # print null terminated string "\n"
 	syscall
 
+# Mission 5 - Count Letters
+	la $t0, StringBuffer # get StringBuffer to a worker var
+	
+	# t0 -> current word t1 -> current char, t8 counter
+t8_logger_word:
+	lb $t1, ($t0) # load to t1 the first character in string
+	beq $t1, 32, next_word_count # if char == ' ' go to next word
+	beq $t1, 10, finish_count # if new line end count
+	addi $t8, $t8, 1 # count++ for current word
+	addi $t0, $t0, 1 # check next char
+	j t8_logger_word
 
+next_word_count:
+	# addi $t8, $t8, 1 # add a word
+	addi $t0, $t0, 1 # check next char
+	j t8_logger_word
+
+finish_count:
+	la $a0, LettersCount # load LettersCount
+	li $v0, 4 # print null terminated string "Total number of letters = "
+	syscall
+
+	la $a0, ($t8) # print LettersCount
+	li $v0, 1 # service 1 is print integer
+	syscall
+
+	la $a0, NewLine # load NewLine
+	li $v0, 4  # print null terminated string "\n"
+	syscall
+	
 	#ADD data valiadation
 	li $v0, 10 # Exit 
 	syscall
+
+
