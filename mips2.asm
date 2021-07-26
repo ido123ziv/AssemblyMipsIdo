@@ -59,16 +59,21 @@ main: # main program entry
 input_validation:
 	lb $t1, ($t0) # load to t1 the first character in string
 	beq $t1, 10, check_new_line # if new line end count
+	beq $t1, 32, check_spaces # if char == ' ' go to next word
 	move $t2, $t1 # set the counter t2 to t1
 	addi $t0, $t0, 1 # check next char
 	j input_validation
-
 	
 check_new_line:
 	beq $t2, 32, input # if last char is space
-#	addi $t0, $t0, 1 
 	j end_validation
 
+check_spaces:
+	beq $t2, 32, input # if two spaces
+	move $t2, $t1 # if not, continue
+	addi $t0, $t0, 1 
+	j input_validation
+	
 input:
 	la $a0, InputNotOk # input is not ok
 	li $v0, 4 # print null terminated string "Number of words = "
@@ -84,6 +89,14 @@ input:
 	li $a1, 81 # Maximum String size is 80
 	li $v0, 8 # service 8 is print str
 	syscall
+	la $a0, StringBuffer # enter the input string to string buffer
+	li $a1, 81 # Maximum String size is 80
+	li $v0, 8 # service 8 is print str
+	syscall
+	
+	li $t1, 0 # reset counter t1
+	li $t2, 0 # reset counter t2
+	la $t0, StringBuffer # get StringBuffer to a worker var
 	j input_validation #check again
 
 end_validation: # Finish validation check
