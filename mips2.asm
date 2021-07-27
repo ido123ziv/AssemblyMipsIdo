@@ -113,7 +113,7 @@ end_validation: # Finish validation check
 	li $v0, 4 # print null terminated string "Number of words = "
 	syscall
 	la $a0, NewLine 
-	li $v0, 4
+	li $v0, 4 # print \n
 	syscall
 
 # Mission 1 - Count how many words in the string	
@@ -298,8 +298,67 @@ finish_count:
 	la $a0, NewLine # load NewLine
 	li $v0, 4  # print null terminated string "\n"
 	syscall
+
+# Mission 6 - get longest letter
+	la $t0, StringBuffer # get StringBuffer to a worker var
+	li $t1, 0 # reset counter t1
+	li $t2, 0 # reset counter t2
+	li $t3, 0 # reset counter t3
+	li $t4, 0 # reset counter t4
+	li $t5, 0 # reset counter t5
 	
-	#ADD data valiadation
+odd_word: # this loop will remember odd words
+	lb $t1, ($t0) # load character (check if space)
+	beq $t1, 32, try_next_word # if char == ' ' go to next word
+	beq $t1,10, finish_six # if new line than it is the last word, finish mission
+    	add $t4, $t4, $t1 # add current char to t4 word
+	addi $t2, $t2, 1 # count ++ to the word
+	addi $t0, $t0, 1 # check next char
+	j odd_word
+	
+try_next_word:
+	addi $t0, $t0, 1 # check next char, continue from space
+	bgt $t2, $t3, reset_even # if t2 > t3 reset t2
+	add $t2, $0, $0 # Reset t2 to check next word
+	add $t4, $0, $0 # Reset t4 to check next word
+
+	j odd_word
+	
+reset_even:
+	add $t3, $0, $0 # Reset t3 to check new word
+	add $t5, $0, $0 # Reset t5 to check next word
+
+even_word:
+	lb $t1, ($t0) # load character (check if space)
+	beq $t1, 32, try_next_word # if char == ' ' go to next word
+	beq $t1,10, finish_six # if new line than it is the last word, finish mission
+	addi $t3, $t3, 1 # count ++ to the word
+    add $t5, $t5, $t1 # add current char to t5 word
+	addi $t0, $t0, 1 # check next char
+	j even_word	
+
+finish_six:
+	la $a0, LongestWord # "longest word = " text
+	li $v0, 4 # print str
+	syscall
+	
+	bgt $t2, $t3, print_word # if t2 > t3 print t4
+	la $a0, ($t5) # read t5 word counter
+	li $v0, 1 # TODO, need to print as str and not as int
+	syscall
+	j end_task6
+	
+print_word:
+	la $a0, ($t4) # read t4 word counter
+	li $v0, 1 # TODO, need to print as str and not as int
+	syscall
+	# echo finish
+	
+end_task6: # Finish mission 6		
+	la $a0, NewLine 
+	li $v0, 4
+	syscall
+
 	li $v0, 10 # Exit 
 	syscall
 
