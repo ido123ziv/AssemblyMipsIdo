@@ -12,9 +12,8 @@
 	LongestWord: .asciiz "The longest word = "
 	ShortestWord: .asciiz "The shortest word = "
 	NewLine: .asciiz "\n"
-	# "Letters in longest word = "
-	# "Letters in shortest word = "
-	# "Total number of letters = "
+	LongLetters: .asciiz "Letters in longest word = "
+	ShortLetters: .asciiz "Letters in shortest word = "
 	LettersCount: .asciiz "Total number of letters = "
 	InputOk: .asciiz "Input is Ok"
 	InputNotOk: .asciiz "Input is Not Ok"
@@ -358,7 +357,7 @@ end_task6: # Finish mission 6
 	la $a0, NewLine 
 	li $v0, 4
 	syscall
-	
+
 	# Mission 7 - get shortest letter
 	la $t0, StringBuffer # get StringBuffer to a worker var
 	li $t1, 0 # reset counter t1
