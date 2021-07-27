@@ -23,12 +23,12 @@
 .globl main
 main: # main program entry
 	la $a0, GetString # $a0 = address of str, set $a0 to GetString label
-	li $v0, 4 # read string
+	li $v0, 4 # print string
 	syscall
 
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
-	li $v0, 8 # service 8 is print str
+	li $v0, 8 # service 8 is read str
 	syscall
 
 # input validation
@@ -82,7 +82,7 @@ check_for_letters:
 	move $t2, $t1 # if not, continue
 	addi $t0, $t0, 1 
 	j input_validation
-	
+
 input:
 	la $a0, InputNotOk # input is not ok
 	li $v0, 4 # print null terminated string "Number of words = "
@@ -91,7 +91,7 @@ input:
 	li $v0, 4
 	syscall
 	la $a0, GetString # $a0 = address of str, set $a0 to GetString label
-	li $v0, 4 # read string
+	li $v0, 4 # print string
 	syscall
 
 	la $a0, StringBuffer # enter the input string to string buffer
@@ -100,7 +100,7 @@ input:
 	syscall
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
-	li $v0, 8 # service 8 is print str
+	li $v0, 8 # service 8 is read str
 	syscall
 	
 	li $t1, 0 # reset counter t1
