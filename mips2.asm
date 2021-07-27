@@ -358,6 +358,67 @@ end_task6: # Finish mission 6
 	la $a0, NewLine 
 	li $v0, 4
 	syscall
+	
+	# Mission 7 - get shortest letter
+	la $t0, StringBuffer # get StringBuffer to a worker var
+	li $t1, 0 # reset counter t1
+	li $t2, 0 # reset counter t2
+	li $t3, 0 # reset counter t3
+	li $t4, 0 # reset counter t4
+	li $t5, 0 # reset counter t5
+	
+odd_word_short: # this loop will remember odd words
+	lb $t1, ($t0) # load character (check if space)
+	beq $t1, 32, try_next_word_short # if char == ' ' go to next word
+	beq $t1,10, finish_seven # if new line than it is the last word, finish mission
+    add $t4, $t4, $t1 # add current char to t4 word
+	addi $t2, $t2, 1 # count ++ to the word
+	addi $t0, $t0, 1 # check next char
+	j odd_word_short
+	
+try_next_word_short:
+	addi $t0, $t0, 1 # check next char, continue from space
+    beqz $t3, even_word_short # if t3 is zero, assign a word to it
+	bgt $t3, $t2, reset_even_short  # if t3 > t2 reset t3
+	add $t2, $0, $0 # Reset t2 to check next word
+	add $t4, $0, $0 # Reset t4 to check next word
+
+	j odd_word_short
+	
+reset_even_short:
+	add $t3, $0, $0 # Reset t3 to check new word
+	add $t5, $0, $0 # Reset t5 to check next word
+
+even_word_short:
+	lb $t1, ($t0) # load character (check if space)
+	beq $t1, 32, try_next_word_short # if char == ' ' go to next word
+	beq $t1,10, finish_seven # if new line than it is the last word, finish mission
+	addi $t3, $t3, 1 # count ++ to the word
+    add $t5, $t5, $t1 # add current char to t5 word
+	addi $t0, $t0, 1 # check next char
+	j even_word_short	
+
+finish_seven:
+	la $a0, ShortLetters # "longest word = " text
+	li $v0, 4
+	syscall
+	
+	blt $t2, $t3, print_word_short # if t3 > t2
+	la $a0, ($t5)
+	li $v0, 1
+	syscall
+	j end_task7
+	
+print_word_short:
+	la $a0, ($t4)
+	li $v0, 1
+	syscall
+	# echo finish
+	
+end_task7: # Finish mission 7		
+	la $a0, NewLine 
+	li $v0, 4
+	syscall
 
 	li $v0, 10 # Exit 
 	syscall
