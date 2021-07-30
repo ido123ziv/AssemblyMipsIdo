@@ -114,10 +114,7 @@ get_guess:
 	la $a0, NewLine
 	li $v0, 4
 	syscall
-	la $a0, bool # load bool to a0
-	li $v0, 4
-	syscall
-	
+
 	j start_guess
 	
 start_guess:
