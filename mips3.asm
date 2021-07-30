@@ -162,15 +162,62 @@ check_second_b:
 	li $v0, 4 # print str
 	syscall
 check_third_b:
-	bne $t4, $t7, echo_failed # t3 != t6 not a 'b'
+	bne $t4, $t7, check_first_p # t3 != t6 not a 'b'
 	addi $t8, $t8, 1 # counter ++
 	la $a0, show_b  # print b
 	li $v0, 4 # print str
 	syscall
-	bne $t8, 3,echo_failed # not 3 'b' so check for 'p'
+	
+	bne $t8, 3,check_first_p # not 3 'b' so check for 'p'
 	li $v0, -1 # game finished
 	jr $ra # Return to main
 
+check_first_p:
+	bne $t2, $t6, check_second_p # t2 != t6
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_second_p:
+	bne $t2, $t7, check_third_p # t2 != t7
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_third_p:
+	bne $t3, $t5, check_fourth_p # t3 != t5
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_fourth_p:
+	bne $t3, $t7, check_fifth_p # t3 != t7
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_fifth_p:
+	bne $t4, $t5, check_sixth_p # t4 != t5
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_sixth_p:
+	bne $t4, $t6, check_for_p_or_b # t4 != t6
+	addi $t9, $t9, 1
+	la $a0, show_p 
+	li $v0, 4
+	syscall
+check_for_p_or_b:
+	bne $t8, $0, end_compare # t8 > 0
+	bne $t9, $0, end_compare # t9 > 0
+	la $a0, show_n 
+	li $v0, 4
+	syscall
+	move $v0, $0
+
+end_compare:
+	jr $ra
 		
 echo_failed:
 	la $a0, NewLine
