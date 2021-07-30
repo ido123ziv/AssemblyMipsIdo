@@ -32,6 +32,14 @@ call_get_guess:
 	syscall
 	jal get_guess
 	bne $v0, -1, call_get_guess # Call another guess if player didn't guess the right number
+play_again:
+	la $a0, end_of_game # load end of game message
+	li $v0, 4 # print
+	syscall
+	 li $v0, 12 # get from user input -y for yes and n for no
+	 syscall
+	 beq $v0, 'y', main # new game
+	 beq $v0, 'n', exit # exit
 ###### mission 1 #########
 get_number:
 	move $t0, $a0 # set t0 to the address of bool
