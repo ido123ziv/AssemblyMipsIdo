@@ -82,3 +82,103 @@ check_last_digit:
 	sb $v0, 0($t0) # store v0 in t0
 	move $t3, $v0 # Store third char in t3
 	jr $ra
+
+################# mission 2 ####################
+## Error handling message and a new guess
+error_guess:
+	la $a0, Error 
+	li $v0, 4
+	syscall
+new_guess:
+	la $a0, InputGuess  
+	li $v0, 4
+	syscall
+print_new_line:
+	la $a0, NewLine
+	li $v0, 4
+	syscall
+get_guess:
+	la $a0, bool # load bool to a0
+	la $a1, guess # load guess to a1
+	move $t0, $a0 # get t0 to bool address
+	move $t1, $a1 # get t1 to guess addres
+	la $a0, NewLine
+	li $v0, 4
+	syscall
+	la $a0, bool # load bool to a0
+	li $v0, 4
+	syscall
+	
+	j start_guess
+	
+start_guess:
+	la $a0, InputGuess # print inpuy guess
+	li $v0, 4
+	syscall
+### Read string	
+	li $v0, 8 
+	move $a0, $t1 # get to a0 the adddress of guess
+	li $a1, 4 # read input
+	syscall
+	
+## Save the 3 chars in registers 
+	lb $t5, 0($t1) # get first guess char to t5
+	lb $t6, 1($t1) # get second guess char to t6
+	lb $t7, 2($t1) # get third guess char to t7
+## Validate guess values
+	blt $t7, '0', error_guess
+	bgt $t7, '9', error_guess
+	blt $t5, '0', error_guess
+	bgt $t5, '9', error_guess
+	blt $t6, '0', error_guess
+	bgt $t6, '9', error_guess 
+## Check if different values
+	beq $t7, $t5, error_guess # t7 == t5
+	beq $t7, $t6, error_guess # t7 == t6
+	beq $t6, $t5, error_guess # t6 == t5
+#### get bool chars to t1-t3
+	lb $t2, 0($t0) # get first bool char to t2
+	lb $t3, 1($t0) # get second bool char to t3
+	lb $t4, 2($t0) # get third bool char to t4
+
+# t1 -t3: bool, $t4-$t6 guess
+	move $t8, $0 # "b" counter
+	move $t9, $0 # "p" counter
+#	print space
+	la $a0, delimete
+	li $v0, 4
+	syscall
+## Check for "b" 's , if 3 "b" then game is finished ($v0 = -1)
+check_first_b:
+	bne $t2, $t5, check_second_b # t2 != $t5 not a 'b'
+	addi $t8, $t8, 1 # counter ++
+	la $a0, show_b  # print b
+	li $v0, 4 # print str
+	syscall
+check_second_b:
+	bne $t3, $t6, check_third_b  # t3 != t6 not a 'b'
+	addi $t8, $t8, 1 # counter ++
+	la $a0, show_b  # print b
+	li $v0, 4 # print str
+	syscall
+check_third_b:
+	bne $t4, $t7, echo_failed # t3 != t6 not a 'b'
+	addi $t8, $t8, 1 # counter ++
+	la $a0, show_b  # print b
+	li $v0, 4 # print str
+	syscall
+	bne $t8, 3,echo_failed # not 3 'b' so check for 'p'
+	li $v0, -1 # game finished
+	jr $ra # Return to main
+
+		
+echo_failed:
+	la $a0, NewLine
+	li $v0, 4
+	syscall
+	move $t8, $0 # reset t8
+	jr $ra
+
+	li $v0, 10 # Exit 
+	syscall
+	
