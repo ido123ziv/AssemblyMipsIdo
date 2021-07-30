@@ -16,7 +16,8 @@
 	show_b: .asciiz "b"
 	show_p: .asciiz "p"
 	show_n: .asciiz "n"
-	
+	delimeter: .asciiz "\t"
+	end_of_game: .asciiz "\nYOU WON!!! \nDo you want another game? \nEntery for yes, n to exit\n"
 ################# Code segment #####################
 .text
 .globl main
@@ -145,7 +146,7 @@ start_guess:
 	move $t8, $0 # "b" counter
 	move $t9, $0 # "p" counter
 #	print space
-	la $a0, delimete
+	la $a0, delimeter
 	li $v0, 4
 	syscall
 ## Check for "b" 's , if 3 "b" then game is finished ($v0 = -1)
