@@ -1,4 +1,4 @@
- # Title: Maman12 Filename: Question3
+# Title: Maman12 Filename: Question3
 # Author: Ido Ziv Date: 20/07/2021
 # Description: Question 3 - get string from user and count number of words, largest word and smallest word
 # Input:
@@ -22,12 +22,12 @@
 .globl main
 main: # main program entry
 	la $a0, GetString # $a0 = address of str, set $a0 to GetString label
-	li $v0, 4 # print string
+	li $v0, 4 # read string
 	syscall
 
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
-	li $v0, 8 # service 8 is read str
+	li $v0, 8 # service 8 is print str
 	syscall
 
 # input validation
@@ -35,25 +35,10 @@ main: # main program entry
 # no two spaces together
 # not ending in space
 # at least one letter
-
-	la $t0, StringBuffer # get StringBuffer to a worker var
+	
 	li $t1, 0 # reset counter t1
 	li $t2, 0 # reset counter t2
-
-# ############### print t1 ################# #
-# la $a0, ($t1) # print WordCount
-# li $v0, 1 # service 1 is print integer
-# syscall
-# ############### print t2 ################# #
-# la $a0, ($t2) # print WordCount
-# li $v0, 1 # service 1 is print integer
-# syscall
-# ############### print newline ################# #
-# la $a0, NewLine 
-# li $v0, 4
-# syscall
-# ################################ #
-
+	la $t0, StringBuffer # get StringBuffer to a worker var
 
 input_validation:
 	lb $t1, ($t0) # load to t1 the first character in string
@@ -65,6 +50,7 @@ input_validation:
 	move $t2, $t1 # set the counter t2 to t1
 	addi $t0, $t0, 1 # check next char
 	j input_validation
+
 	
 check_new_line:
 	beq $t2, 32, input # if last char is space
@@ -81,7 +67,7 @@ check_for_letters:
 	move $t2, $t1 # if not, continue
 	addi $t0, $t0, 1 
 	j input_validation
-
+	
 input:
 	la $a0, InputNotOk # input is not ok
 	li $v0, 4 # print null terminated string "Number of words = "
@@ -90,21 +76,17 @@ input:
 	li $v0, 4
 	syscall
 	la $a0, GetString # $a0 = address of str, set $a0 to GetString label
-	li $v0, 4 # print string
+	li $v0, 4 # read string
 	syscall
 
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
 	li $v0, 8 # service 8 is print str
 	syscall
-	la $a0, StringBuffer # enter the input string to string buffer
-	li $a1, 81 # Maximum String size is 80
-	li $v0, 8 # service 8 is read str
-	syscall
-	
 	li $t1, 0 # reset counter t1
 	li $t2, 0 # reset counter t2
 	la $t0, StringBuffer # get StringBuffer to a worker var
+
 	j input_validation #check again
 
 end_validation: # Finish validation check
@@ -112,9 +94,8 @@ end_validation: # Finish validation check
 	li $v0, 4 # print null terminated string "Number of words = "
 	syscall
 	la $a0, NewLine 
-	li $v0, 4 # print \n
+	li $v0, 4
 	syscall
-
 # Mission 1 - Count how many words in the string	
 	addi $t2, $0, 1 # $t2 will store the word count which is minimum 1
 	la $t0, StringBuffer # get StringBuffer to a worker var
@@ -153,13 +134,15 @@ t2_logger_word: # this loop will remember odd words
 	beq $t1, 32, next_word # if char == ' ' go to next word
 	beq $t1,10, finish_long # if new line than it is the last word, finish mission
 	addi $t2, $t2, 1 # count ++ to the word
+	move $t8, $t0 # load t8 with current location
 	addi $t0, $t0, 1 # check next char
 	j t2_logger_word
 	
 next_word:
 	addi $t0, $t0, 1 # check next char, continue from space
-	bgt $t2, $t3, reset_t3 # if t2 > t3 reset t2
+	bge $t2, $t3, reset_t3 # if t2 > t3 reset t2
 	add $t2, $0, $0 # Reset t2 to check next word
+	add $t8, $0, $0 # reset t8
 	j t2_logger_word
 	
 reset_t3:
@@ -169,23 +152,33 @@ t3_word:
 	beq $t1, 32, next_word # if char == ' ' go to next word
 	beq $t1,10, finish_long # if new line than it is the last word, finish mission
 	addi $t3, $t3, 1 # count ++ to the word
+	move $t9, $t0 # load t8 with current location
 	addi $t0, $t0, 1 # check next char
 	j t3_word	
 
 finish_long:
-	la $a0, LongestWord # "Letters in longest word = " text
+	la $a0, LongLetters # "Letters in longest word = " text
 	li $v0, 4
 	syscall
 	
-	bgt $t2, $t3, print_t2
-	add $t6, $t3, $t0 # Store longest word, for future purposes, t3
+	bge $t2, $t3, print_t2
+	move $t6, $t3 ## store longest word count in t6
+	move $t8, $t9 # t3 > t2, so t8 will hold the location
 	la $a0, ($t3)
 	li $v0, 1
 	syscall
 	j end_task2
-	
+##########################################################################################
 print_t2:
-	add $t6, $t2, $t0 # Store longest word, for future purposes, t2
+	bne $t2, $t3, store_longest # for mission 6
+	bgt $t9, $t8, store_odd_longest # t2 > t3 so move t9 to t8
+	j store_longest
+
+store_odd_longest:
+	move $t8, $t9 # t8 will store the address of last char of longest word
+store_longest: 
+	move $t6, $t2  # t2 > t3 so move it to holder
+	
 	la $a0, ($t2)
 	li $v0, 1
 	syscall
@@ -200,12 +193,15 @@ end_task2: # Finish mission 2
 # t0 -> the word t1 -> current letter t4- > odd buffer t5 -> even buffer
 #	add $t4, $0, $0 # reset t4
 	la $t0, StringBuffer # get StringBuffer to a worker var
+	add $t9, $0, $0 # Reset t9 
+	add $t2, $0, $0 # Reset t2
 
 t4_logger_word:  # this loop will remember odd words
 	lb $t1, ($t0) # load to t1 the first character in string
 	beq $t1, 32, next_word_short # if char == ' ' go to next word
 	beq $t1, 10, finish_short # if new line end count
 	addi $t4, $t4, 1 # count++ for current word
+	move $t9, $t0 # Use to save address of word last char for mission 7
 	addi $t0, $t0, 1 # check next char
 	j t4_logger_word
 
@@ -214,6 +210,7 @@ next_word_short:
 	beqz $t5, t5_logger_word # if t5 is zero, assign a word to it
 	bgt $t5, $t4, reset_t5 # if t5 > t4 reset t5
 	add $t4, $0, $0 # reset t4 because t4 > t5
+	add $t9, $0, $0
 	j t4_logger_word 
 
 reset_t5:
@@ -224,27 +221,40 @@ t5_logger_word:  # this loop will remember even words
 	beq $t1, 32, next_word_short # if char == ' ' go to next word
 	beq $t1, 10, finish_short # if new line end count
 	addi $t5, $t5, 1 # count++ for current word
+	move $t2, $t0 # for mission 6	
 	addi $t0, $t0, 1 # check next char
 	j t5_logger_word
 
 finish_short:
-	la $a0, ShortestWord # load text ShortestWord
+	la $a0, ShortLetters # load text ShortestWord
 	li $v0, 4 # print null terminated string "The Shortest word = "
 	syscall
 
-	blt $t4, $t5, print_odd_short # if t2 > t3 print odd
-	add $t7, $t5, $t0 # Store longest word, for future purposes
-	la $a0, ($t5) # print letter count
-	li $v0, 1 # service 1 is print integer
-	syscall
-	j end_task3 # goto end if printed
+	#blt $t4, $t5, print_odd_short # if t5 > t4 print odd
+	bgt $t5, $t4, print_odd_short # Print the smallest number of words
+	beq $t5, $t4, check_last # check for last word in string
+	move $t9, $t2
+	j store_shortest
 
 print_odd_short:
-	add $t7, $t4, $t0 # Store longest word, for future purposes
+	add $t7, $t4, $0 # Store longest word, for future purposes
 	la $a0, ($t4) # print letter count
 	li $v0, 1 # service 1 is print integer
 	syscall
+	j end_task3
 
+check_last:
+	bgt $t2, $t9, store_shortest_odd # store the shortest amoung all words
+	j store_shortest
+
+store_shortest_odd:
+	move $t9, $t2
+
+store_shortest:
+	move $t7, $t5 # shortest word, t5 < t4
+	la $a0, ($t5)
+	li $v0, 1
+	syscall
 # echo finish
 end_task3:
 	la $a0, NewLine # load NewLine
@@ -255,12 +265,13 @@ end_task3:
 # t6 -> longest , t7 -> shortest
 
 end_task4:
+	add $t2, $0, $0 # Reset t2
 	la $a0, Diff # load text Diff
 	li $v0, 4 # print null terminated string "Difference = "
 	syscall
 
-	sub $t6, $t6, $t7 # subtract t7 from t6 (long - short)
-	la $a0, ($t6) # print diff
+	sub $t2, $t6, $t7 # subtract t7 from t6 (long - short)
+	la $a0, ($t2) # print diff
 	li $v0, 1 # service 1 is print integer
 	syscall
 
@@ -270,27 +281,27 @@ end_task4:
 
 # Mission 5 - Count Letters
 	la $t0, StringBuffer # get StringBuffer to a worker var
-	
+	add $t2, $0, $0 # Reset t2
 	# t0 -> current word t1 -> current char, t8 counter
-t8_logger_word:
+
+counter:
 	lb $t1, ($t0) # load to t1 the first character in string
 	beq $t1, 32, next_word_count # if char == ' ' go to next word
 	beq $t1, 10, finish_count # if new line end count
-	addi $t8, $t8, 1 # count++ for current word
+	addi $t2, $t2, 1 # count++ for current word
 	addi $t0, $t0, 1 # check next char
-	j t8_logger_word
+	j counter
 
 next_word_count:
-	# addi $t8, $t8, 1 # add a word
 	addi $t0, $t0, 1 # check next char
-	j t8_logger_word
+	j counter
 
 finish_count:
 	la $a0, LettersCount # load LettersCount
 	li $v0, 4 # print null terminated string "Total number of letters = "
 	syscall
 
-	la $a0, ($t8) # print LettersCount
+	la $a0, ($t2) # print LettersCount
 	li $v0, 1 # service 1 is print integer
 	syscall
 
@@ -299,127 +310,55 @@ finish_count:
 	syscall
 
 # Mission 6 - get longest letter
-	la $t0, StringBuffer # get StringBuffer to a worker var
-	li $t1, 0 # reset counter t1
-	li $t2, 0 # reset counter t2
-	li $t3, 0 # reset counter t3
-	li $t4, 0 # reset counter t4
-	li $t5, 0 # reset counter t5
-	
-odd_word: # this loop will remember odd words
-	lb $t1, ($t0) # load character (check if space)
-	beq $t1, 32, try_next_word # if char == ' ' go to next word
-	beq $t1,10, finish_six # if new line than it is the last word, finish mission
-    	add $t4, $t4, $t1 # add current char to t4 word
-	addi $t2, $t2, 1 # count ++ to the word
-	addi $t0, $t0, 1 # check next char
-	j odd_word
-	
-try_next_word:
-	addi $t0, $t0, 1 # check next char, continue from space
-	bgt $t2, $t3, reset_even # if t2 > t3 reset t2
-	add $t2, $0, $0 # Reset t2 to check next word
-	add $t4, $0, $0 # Reset t4 to check next word
-
-	j odd_word
-	
-reset_even:
-	add $t3, $0, $0 # Reset t3 to check new word
-	add $t5, $0, $0 # Reset t5 to check next word
-
-even_word:
-	lb $t1, ($t0) # load character (check if space)
-	beq $t1, 32, try_next_word # if char == ' ' go to next word
-	beq $t1,10, finish_six # if new line than it is the last word, finish mission
-	addi $t3, $t3, 1 # count ++ to the word
-    add $t5, $t5, $t1 # add current char to t5 word
-	addi $t0, $t0, 1 # check next char
-	j even_word	
-
-finish_six:
+	# t6 store count of longest word, t8 store address in StringBuffer of last char in longest word
 	la $a0, LongestWord # "longest word = " text
-	li $v0, 4 # print str
+	li $v0, 4
 	syscall
 	
-	bgt $t2, $t3, print_word # if t2 > t3 print t4
-	la $a0, ($t5) # read t5 word counter
-	li $v0, 1 # TODO, need to print as str and not as int
-	syscall
-	j end_task6
+	sub $t8, $t8, $t6 # t8 now holds the length of the word
+	addi $t6, $t6, 1 # t6 is the first char in the word
+	move $t1, $0 # reset t1
 	
-print_word:
-	la $a0, ($t4) # read t4 word counter
-	li $v0, 1 # TODO, need to print as str and not as int
+print_longest_word:
+	lb $t0, ($t8) # get first char of str
+	la $a0, ($t0) 
+	li $v0, 11 # print char
 	syscall
-	# echo finish
 	
-end_task6: # Finish mission 6		
+	addi $t8, $t8, 1 # next char please
+	addi $t1, $t1, 1 # location counter ++
+	bne $t1, $t6, print_longest_word # not finished? continue to next char
+
+	# finish task		
 	la $a0, NewLine 
 	li $v0, 4
 	syscall
-
-	# Mission 7 - get shortest letter
-	la $t0, StringBuffer # get StringBuffer to a worker var
-	li $t1, 0 # reset counter t1
-	li $t2, 0 # reset counter t2
-	li $t3, 0 # reset counter t3
-	li $t4, 0 # reset counter t4
-	li $t5, 0 # reset counter t5
 	
-odd_word_short: # this loop will remember odd words
-	lb $t1, ($t0) # load character (check if space)
-	beq $t1, 32, try_next_word_short # if char == ' ' go to next word
-	beq $t1,10, finish_seven # if new line than it is the last word, finish mission
-    add $t4, $t4, $t1 # add current char to t4 word
-	addi $t2, $t2, 1 # count ++ to the word
-	addi $t0, $t0, 1 # check next char
-	j odd_word_short
-	
-try_next_word_short:
-	addi $t0, $t0, 1 # check next char, continue from space
-    beqz $t3, even_word_short # if t3 is zero, assign a word to it
-	bgt $t3, $t2, reset_even_short  # if t3 > t2 reset t3
-	add $t2, $0, $0 # Reset t2 to check next word
-	add $t4, $0, $0 # Reset t4 to check next word
-
-	j odd_word_short
-	
-reset_even_short:
-	add $t3, $0, $0 # Reset t3 to check new word
-	add $t5, $0, $0 # Reset t5 to check next word
-
-even_word_short:
-	lb $t1, ($t0) # load character (check if space)
-	beq $t1, 32, try_next_word_short # if char == ' ' go to next word
-	beq $t1,10, finish_seven # if new line than it is the last word, finish mission
-	addi $t3, $t3, 1 # count ++ to the word
-    add $t5, $t5, $t1 # add current char to t5 word
-	addi $t0, $t0, 1 # check next char
-	j even_word_short	
-
-finish_seven:
+# Mission 7 - get shortest letter
+	# t7 store count of shortest word, t9 store address of last char in shortest word
 	la $a0, ShortLetters # "longest word = " text
 	li $v0, 4
 	syscall
 	
-	blt $t2, $t3, print_word_short # if t3 > t2
-	la $a0, ($t5)
-	li $v0, 1
-	syscall
-	j end_task7
+	sub $t9, $t9, $t7 # t9 now holds the length of the word
+	addi $t7, $t7, 1 # t7 is the first char in the word
+	move $t1, $0 # reset t1
 	
-print_word_short:
-	la $a0, ($t4)
-	li $v0, 1
+print_shortest_word:
+	lb $t0, ($t9) # get first char of str
+	la $a0, ($t0) 
+	li $v0, 11 # print char
 	syscall
-	# echo finish
 	
-end_task7: # Finish mission 7		
+	addi $t9, $t9, 1 # next char please
+	addi $t1, $t1, 1 # location counter ++
+	bne $t1, $t7, print_shortest_word # not finished? continue to next char
+
+	# finish task		
 	la $a0, NewLine 
 	li $v0, 4
 	syscall
-
+		
 	li $v0, 10 # Exit 
 	syscall
-
 
