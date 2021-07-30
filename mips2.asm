@@ -27,7 +27,7 @@ main: # main program entry
 
 	la $a0, StringBuffer # enter the input string to string buffer
 	li $a1, 81 # Maximum String size is 80
-	li $v0, 8 # service 8 is print str
+	li $v0, 8 # service 8 is read str
 	syscall
 
 # input validation
